@@ -5,8 +5,11 @@ RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
 WORKDIR $APP_HOME
 
+LABEL maintainer='api.imperfect@gmail.com'
+LABEL youtube="https://www.youtube.com/c/APIImperfect"
+LABEL decription="Development image for Real Estate Project"
 
-ENV PYHTONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE 1
 
 ENV PYTHONUNBUFFERED 1
 
@@ -18,11 +21,11 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 
-COPY ./requirements.txt /app/requirements.txt
+COPY ./requirements.txt /app/requirements.txt 
 
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 COPY ./docker/local/django/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint
@@ -32,4 +35,14 @@ COPY ./docker/local/django/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
-ENTRYPOINT [ "/entrypoint" ]
+
+COPY ./docker/local/django/celery/worker/start /start-celeryworker
+RUN sed -i 's/\r$//g' /start-celeryworker
+RUN chmod +x /start-celeryworker
+
+COPY ./docker/local/django/celery/flower/start /start-flower
+RUN sed -i 's/\r$//g' /start-flower
+RUN chmod +x /start-flower
+
+
+ENTRYPOINT [ "/entrypoint"]
